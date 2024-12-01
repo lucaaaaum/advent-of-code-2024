@@ -1,5 +1,5 @@
-# Created by https://www.toptal.com/developers/gitignore/api/zig,direnv,git
-# Edit at https://www.toptal.com/developers/gitignore?templates=zig,direnv,git
+# Created by https://www.toptal.com/developers/gitignore/api/go,vim,direnv,git
+# Edit at https://www.toptal.com/developers/gitignore?templates=go,vim,direnv,git
 
 ### direnv ###
 .direnv
@@ -20,14 +20,49 @@
 *_LOCAL_*.txt
 *_REMOTE_*.txt
 
-### zig ###
-# Zig programming language
+### Go ###
+# If you prefer the allow list template instead of the deny list, see community template:
+# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
+#
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
 
-zig-cache/
-zig-out/
-build/
-build-*/
-docgen_tmp/
+# Test binary, built with `go test -c`
+*.test
 
-# End of https://www.toptal.com/developers/gitignore/api/zig,direnv,git
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
+
+# Go workspace file
+go.work
+
+### Vim ###
+# Swap
+[._]*.s[a-v][a-z]
+!*.svg  # comment out if you don't need vector files
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# Session
+Session.vim
+Sessionx.vim
+
+# Temporary
+.netrwhist
+*~
+# Auto-generated tag files
+tags
+# Persistent undo
+[._]*.un~
+
+# End of https://www.toptal.com/developers/gitignore/api/go,vim,direnv,git
 
