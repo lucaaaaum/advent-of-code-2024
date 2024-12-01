@@ -14,7 +14,7 @@
     in with pkgs; {
       devShell = pkgs.mkShell {
         buildInputs = [
-          zig
+          go
         ];
       };
     });
