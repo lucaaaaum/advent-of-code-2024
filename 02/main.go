@@ -16,6 +16,9 @@ func main() {
 
 	safeReportsAmount := countSafeReports(reports)
 	fmt.Printf("safeReportsAmount: %v\n", safeReportsAmount)
+
+	safeReportsWithToleranceAmount := countSafeReportsWithTolerance(reports)
+	fmt.Printf("safeReportsWithToleranceAmount: %v\n", safeReportsWithToleranceAmount)
 }
 
 func readInput() ([][]int, error) {
@@ -48,48 +51,78 @@ func readInput() ([][]int, error) {
 }
 
 func countSafeReports(reports [][]int) int {
-	safeReports := 0
+	safeReports, _ := groupReports(reports)
+	return len(safeReports)
+}
+
+func groupReports(reports [][]int) ([][]int, [][]int) {
+	safeReports := [][]int{}
+	unsafeReports := [][]int{}
 
 	for _, report := range reports {
-		safe := true
-		direction := Undefined
-
-		for i, current := range report {
-			if i != len(report)-1 {
-				next := report[i+1]
-				currentDirection := Undefined
-				difference := 0
-
-				if current < next {
-					currentDirection = Increasing
-					difference = next - current
-				} else {
-					currentDirection = Decreasing
-					difference = current - next
-				}
-
-				if difference < 1 || difference > 3 {
-					safe = false
-					break
-				}
-
-				if direction == Undefined {
-					direction = currentDirection
-				}
-
-				if currentDirection != direction {
-					safe = false
-					break
-				}
-			}
-		}
-
-		if safe {
-			safeReports++
+		if isSafe(report) {
+			safeReports = append(safeReports, report)
+		} else {
+			unsafeReports = append(unsafeReports, report)
 		}
 	}
 
-	return safeReports
+	return safeReports, unsafeReports
+}
+
+func isSafe(report []int) bool {
+	safe := true
+	direction := Undefined
+
+	for i, current := range report {
+		if i != len(report)-1 {
+			next := report[i+1]
+			currentDirection := Undefined
+			difference := 0
+
+			if current < next {
+				currentDirection = Increasing
+				difference = next - current
+			} else {
+				currentDirection = Decreasing
+				difference = current - next
+			}
+
+			if difference < 1 || difference > 3 {
+				safe = false
+				break
+			}
+
+			if direction == Undefined {
+				direction = currentDirection
+			}
+
+			if currentDirection != direction {
+				safe = false
+				break
+			}
+		}
+	}
+
+	return safe
+}
+
+func countSafeReportsWithTolerance(reports [][]int) int {
+	safeReports, unsafeReports := groupReports(reports)
+
+	for _, report := range unsafeReports {
+		for itemIndex := range report {
+			reportWithoutItem := make([]int, 0)
+			reportWithoutItem = append(reportWithoutItem, report[:itemIndex]...)
+			reportWithoutItem = append(reportWithoutItem, report[itemIndex+1:]...)
+			if isSafe(reportWithoutItem) {
+				safeReports = append(safeReports, report)
+				break
+			}
+		}
+	}
+
+	return len(safeReports)
 }
 
 type Direction int
