@@ -9,14 +9,13 @@ import (
 )
 
 func main() {
-    input, err := readInput()
-    if err != nil {
-        panic(err)
-    }
+	reports, err := readInput()
+	if err != nil {
+		panic(err)
+	}
 
-    for _, v := range input {
-        fmt.Printf("v: %v\n", v)
-    }
+	safeReportsAmount := countSafeReports(reports)
+	fmt.Printf("safeReportsAmount: %v\n", safeReportsAmount)
 }
 
 func readInput() ([][]int, error) {
@@ -48,6 +47,55 @@ func readInput() ([][]int, error) {
 	return input, nil
 }
 
-func countSafeReports()  {
-    
+func countSafeReports(reports [][]int) int {
+	safeReports := 0
+
+	for _, report := range reports {
+		safe := true
+		direction := Undefined
+
+		for i, current := range report {
+			if i != len(report)-1 {
+				next := report[i+1]
+				currentDirection := Undefined
+				difference := 0
+
+				if current < next {
+					currentDirection = Increasing
+					difference = next - current
+				} else {
+					currentDirection = Decreasing
+					difference = current - next
+				}
+
+				if difference < 1 || difference > 3 {
+					safe = false
+					break
+				}
+
+				if direction == Undefined {
+					direction = currentDirection
+				}
+
+				if currentDirection != direction {
+					safe = false
+					break
+				}
+			}
+		}
+
+		if safe {
+			safeReports++
+		}
+	}
+
+	return safeReports
 }
+
+type Direction int
+
+const (
+	Undefined Direction = iota
+	Increasing
+	Decreasing
+)
