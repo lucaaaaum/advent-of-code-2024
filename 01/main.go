@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -13,8 +14,14 @@ func main() {
 		panic(err)
 	}
 
-    quick1 := quicksort(list1)
-    quick2 := quicksort(list2)
+	quick1 := quicksort(list1)
+	quick2 := quicksort(list2)
+
+	totalDistance := calculateTotalDistance(quick1, quick2)
+	fmt.Printf("totalDistance: %v\n", totalDistance)
+
+	similarity := calculateSimilarity(quick1, quick2)
+	fmt.Printf("similarity: %v\n", similarity)
 }
 
 func readInput() ([]int, []int, error) {
@@ -63,11 +70,49 @@ func quicksort(input []int) []int {
 		}
 	}
 
-    left = quicksort(left)
-    right = quicksort(right)
+	left = quicksort(left)
+	right = quicksort(right)
 
 	output := append(left, pivot)
 	output = append(output, right...)
 
 	return output
+}
+
+func calculateTotalDistance(list1 []int, list2 []int) int {
+	totalDistance := 0
+
+	for i := 0; i < len(list1); i++ {
+		if list1[i] > list2[i] {
+			totalDistance += list1[i] - list2[i]
+		} else {
+			totalDistance += list2[i] - list1[i]
+		}
+	}
+
+	return totalDistance
+}
+
+func calculateSimilarity(list1 []int, list2 []int) int {
+	similarities := make([]int, 0)
+
+	lastIndexOfList2 := 0
+	for _, v := range list1 {
+		reocurrences := 0
+		for i := lastIndexOfList2; i < len(list2); i++ {
+			if v == list2[i] {
+				reocurrences++
+				lastIndexOfList2 = i
+			} else if v < list2[i] {
+				break
+			}
+		}
+		similarities = append(similarities, v*reocurrences)
+	}
+
+	totalSimilarities := 0
+	for _, v := range similarities {
+		totalSimilarities += v
+	}
+	return totalSimilarities
 }
