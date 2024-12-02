@@ -12,6 +12,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+    quick1 := quicksort(list1)
+    quick2 := quicksort(list2)
 }
 
 func readInput() ([]int, []int, error) {
@@ -59,6 +62,9 @@ func quicksort(input []int) []int {
 			right = append(right, input[i])
 		}
 	}
+
+    left = quicksort(left)
+    right = quicksort(right)
 
 	output := append(left, pivot)
 	output = append(output, right...)
