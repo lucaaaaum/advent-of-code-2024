@@ -7,12 +7,12 @@ import (
 )
 
 func main() {
-    input, err := readInput()
-    if err != nil {
-        panic(err)
-    }
+	input, err := readInput()
+	if err != nil {
+		panic(err)
+	}
 
-    fmt.Printf("input: %v\n", input)
+	multiply(input)
 }
 
 func readInput() (string, error) {
@@ -23,11 +23,30 @@ func readInput() (string, error) {
 
 	scanner := bufio.NewScanner(file)
 
-    input := ""
+	input := ""
 
-    for scanner.Scan() {
-        input += scanner.Text()
-    }
+	for scanner.Scan() {
+		input += scanner.Text()
+	}
 
-    return input, nil
+	return input, nil
+}
+
+func multiply(input string) int {
+	for i, v := range input {
+		if i > len(input)-8 {
+			break
+		}
+
+		if v == 'm' {
+			fmt.Printf("input[i : i+8]: %v\n", input[i:i+8])
+			if input[i:i+4] != "mul(" {
+                continue
+			}
+
+
+		}
+	}
+
+	return 1
 }
