@@ -14,6 +14,9 @@ func main() {
 
 	occurrences := grid.countXmasOccurences()
 	fmt.Printf("occurrences: %v\n", occurrences)
+
+    x_masOccurrences := grid.countX_masOccurrences()
+    fmt.Printf("x_masOccurrences: %v\n", x_masOccurrences)
 }
 
 func readInput(path string) (grid, error) {
@@ -72,6 +75,32 @@ func (g grid) countXmas(x, y int) int {
 	return count
 }
 
+func (g grid) countX_masOccurrences() int {
+	count := 0
+	for y, line := range g.items {
+		for x, char := range line {
+			if char == 'A' && g.isX_mas(x, y) {
+                count++
+			}
+		}
+	}
+	return count
+}
+
+func (g grid) isX_mas(x, y int) bool {
+	hasMTopRight := g.findSequence("M", x, y, TopRight)
+	hasSBottomLeft := g.findSequence("S", x, y, BottomLeft)
+	hasMBottomLeft := g.findSequence("M", x, y, BottomLeft)
+	hasSTopRight := g.findSequence("S", x, y, TopRight)
+
+	hasMTopLeft := g.findSequence("M", x, y, TopLeft)
+	hasSBottomRight := g.findSequence("S", x, y, BottomRight)
+	hasMBottomRight := g.findSequence("M", x, y, BottomRight)
+	hasSTopLeft := g.findSequence("S", x, y, TopLeft)
+
+	return ((hasMTopRight && hasSBottomLeft) || (hasSTopRight) && hasMBottomLeft) && ((hasMTopLeft && hasSBottomRight) || (hasSTopLeft && hasMBottomRight))
+}
+
 func (g grid) findSequence(sequence string, x, y int, dir direction) bool {
 	x, y = applyDirection(x, y, dir)
 
@@ -104,9 +133,9 @@ func applyDirection(x, y int, dir direction) (int, int) {
 	case Right:
 		x++
 		break
-    case BottomRight:
-        y++
-        x++
+	case BottomRight:
+		y++
+		x++
 	case Bottom:
 		y++
 		break
