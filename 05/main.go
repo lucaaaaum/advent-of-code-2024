@@ -14,6 +14,9 @@ func main() {
 		panic(err)
 	}
 
+	for _, update := range updates {
+
+	}
 }
 
 func readInput(path string) (map[int][]int, map[int][]int, error) {
@@ -65,5 +68,10 @@ func readInput(path string) (map[int][]int, map[int][]int, error) {
 	return rules, updates, nil
 }
 
-type rule struct {
+func orderUpdate(update []int, rules map[int]int) []int {
+	for _, updateElement := range update {
+		elementsRules := rules[updateElement]
+		otherElements := make([]int, 0)
+		otherElements = append(otherElements, update[:updateElement])
+	}
 }
