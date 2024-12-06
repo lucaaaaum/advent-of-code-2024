@@ -101,12 +101,50 @@ func sumMiddlePageNumberForUnorderedUpdates(updates map[int][]int, rules map[int
 	result := 0
 	for _, update := range updates {
 		if !isOrdered(update, rules) {
-			update := orderUpdate(update, rules)
+			update = order(update, rules)
+			if !isOrdered(update, rules) {
+				panic("Not ordered!")
+			}
 			result += update[len(update)/2]
 		}
 	}
 	return result
 }
 
-func orderUpdate(update []int, rules map[int][]int) []int {
+func order(pages []int, rules map[int][]int) []int {
+	if len(pages) <= 1 {
+		return pages
+	}
+
+	pivotIndex := 0
+	pivot := pages[pivotIndex]
+	otherPages := make([]int, 0)
+	otherPages = append(otherPages, pages[:pivotIndex]...)
+	otherPages = append(otherPages, pages[pivotIndex+1:]...)
+	rulesForPage := rules[pivot]
+
+	left := make([]int, 0)
+	right := make([]int, 0)
+
+	for _, otherPage := range otherPages {
+		isInRule := false
+		for _, ruleForPage := range rulesForPage {
+			if ruleForPage == otherPage {
+				isInRule = true
+				break
+			}
+		}
+		if isInRule {
+			right = append(right, otherPage)
+		} else {
+			left = append(left, otherPage)
+		}
+	}
+
+	result := make([]int, 0)
+	result = append(result, order(left, rules)...)
+	result = append(result, pivot)
+	result = append(result, order(right, rules)...)
+
+	return result
 }
