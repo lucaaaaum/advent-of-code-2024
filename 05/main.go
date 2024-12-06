@@ -14,9 +14,11 @@ func main() {
 		panic(err)
 	}
 
-	for _, update := range updates {
+	result := sumMiddlePageNumberForOrderedUpdates(updates, rules)
+	fmt.Printf("result: %v\n", result)
 
-	}
+	result2 := sumMiddlePageNumberForUnorderedUpdates(updates, rules)
+	fmt.Printf("result2: %v\n", result2)
 }
 
 func readInput(path string) (map[int][]int, map[int][]int, error) {
@@ -37,7 +39,7 @@ func readInput(path string) (map[int][]int, map[int][]int, error) {
 		line := scanner.Text()
 		lineCounter++
 
-		if line == "" {
+		if line == "" || line == "\n" {
 			rulesAreDone = true
 			continue
 		}
@@ -68,10 +70,43 @@ func readInput(path string) (map[int][]int, map[int][]int, error) {
 	return rules, updates, nil
 }
 
-func orderUpdate(update []int, rules map[int]int) []int {
-	for _, updateElement := range update {
-		elementsRules := rules[updateElement]
-		otherElements := make([]int, 0)
-		otherElements = append(otherElements, update[:updateElement])
+func sumMiddlePageNumberForOrderedUpdates(updates map[int][]int, rules map[int][]int) int {
+	result := 0
+	for _, update := range updates {
+		if isOrdered(update, rules) {
+			result += update[len(update)/2]
+		}
 	}
+	return result
+}
+
+func isOrdered(update []int, rules map[int][]int) bool {
+	for i, page := range update {
+		otherPages := make([]int, 0)
+		otherPages = append(otherPages, update[:i]...)
+
+		rulesForPage := rules[page]
+		for _, otherPage := range otherPages {
+			for _, ruleForPage := range rulesForPage {
+				if ruleForPage == otherPage {
+					return false
+				}
+			}
+		}
+	}
+	return true
+}
+
+func sumMiddlePageNumberForUnorderedUpdates(updates map[int][]int, rules map[int][]int) int {
+	result := 0
+	for _, update := range updates {
+		if !isOrdered(update, rules) {
+			update := orderUpdate(update, rules)
+			result += update[len(update)/2]
+		}
+	}
+	return result
+}
+
+func orderUpdate(update []int, rules map[int][]int) []int {
 }
