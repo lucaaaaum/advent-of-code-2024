@@ -17,10 +17,29 @@ func main() {
 
 	countVisited := g.countVisitedFields()
 	fmt.Printf("countVisited: %v\n", countVisited)
+
+	loops, err := g.countLoops()
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("loops: %v\n", loops)
 }
 
 type grid struct {
-	fields [][]field
+	fields           [][]field
+	originX, originY int
+}
+
+func (g grid) reset() {
+	for y, line := range g.fields {
+		for x, field := range line {
+			if field == visited || field == customObstacle || field == guard {
+				g.fields[y][x] = empty
+			}
+		}
+	}
+	g.fields[g.originY][g.originX] = guard
 }
 
 type field int
@@ -28,6 +47,7 @@ type field int
 const (
 	empty field = iota
 	obstacle
+	customObstacle
 	guard
 	visited
 )
@@ -50,7 +70,7 @@ func readInput(path string) (grid, error) {
 
 	scanner := bufio.NewScanner(file)
 
-	g := grid{fields: make([][]field, 0)}
+	g := grid{fields: make([][]field, 0), originX: -1, originY: -1}
 
 	currentLine := -1
 	for scanner.Scan() {
@@ -65,6 +85,8 @@ func readInput(path string) (grid, error) {
 				g.fields[currentLine][currentField] = obstacle
 			case '^':
 				g.fields[currentLine][currentField] = guard
+				g.originX = currentField
+				g.originY = currentLine
 			default:
 				return grid{}, fmt.Errorf("Unknown field type: %v", field)
 			}
@@ -82,6 +104,8 @@ func (g grid) printGrid(dir direction) {
 				fmt.Print("\033[0;0m.")
 			case obstacle:
 				fmt.Print("\033[0;31m#")
+			case customObstacle:
+				fmt.Print("\033[0;32mO")
 			case guard:
 				char := '^'
 				switch dir {
@@ -103,37 +127,52 @@ func (g grid) printGrid(dir direction) {
 	}
 }
 
-func (g grid) run() error {
+func (g grid) run() ([][]int, error) {
 	guardX, guardY, err := g.findGuard()
 	if err != nil {
-		return err
+		return nil, err
 	}
+
+	path := make([][]int, 0)
+	hits := make([]hit, 0)
 
 	guardDir := up
 	for true {
 		nextFieldX, nextFieldY, err := g.getNextField(guardX, guardY, guardDir)
 		if err != nil {
 			g.fields[guardY][guardX] = visited
-            break
+			break
 		}
 
 		switch g.fields[nextFieldY][nextFieldX] {
 		case empty, visited:
 			g.fields[guardY][guardX] = visited
+			path = append(path, []int{guardX, guardY})
 			guardX, guardY = nextFieldX, nextFieldY
 			g.fields[guardY][guardX] = guard
-		case obstacle:
+		case obstacle, customObstacle:
+			for _, hit := range hits {
+				if hit.x == nextFieldX && hit.y == nextFieldY && hit.dir == guardDir {
+					return nil, fmt.Errorf("Loop detected")
+				}
+			}
+			hits = append(hits, hit{x: nextFieldX, y: nextFieldY, dir: guardDir})
 			guardDir = turnRight(guardDir)
 		}
 	}
 
-	return nil
+	return path, nil
+}
+
+type hit struct {
+	x, y int
+	dir  direction
 }
 
 func (g grid) getNextField(x, y int, dir direction) (int, int, error) {
 	x, y = applyDirection(x, y, dir)
 
-	if x < 0 || y < 0 || x >= len(g.fields[y]) || y >= len(g.fields) {
+	if x < 0 || y < 0 || y >= len(g.fields) || x >= len(g.fields[y]) {
 		return 0, 0, fmt.Errorf("Out of bounds")
 	}
 
@@ -195,4 +234,44 @@ func (g grid) countVisitedFields() int {
 		}
 	}
 	return count
+}
+
+func (g grid) countLoops() (int, error) {
+	g.reset()
+	path, err := g.run()
+	if err != nil {
+		return -1, err
+	}
+
+	pathWithoutOrigin := make([][]int, 0)
+	for _, field := range path {
+		if field[0] != g.originX || field[1] != g.originY {
+			pathWithoutOrigin = append(pathWithoutOrigin, []int{field[0], field[1]})
+		}
+	}
+
+	uniquePaths := make([][]int, 0)
+	for _, field := range pathWithoutOrigin {
+		alreadyIn := false
+		for _, uniqueField := range uniquePaths {
+			if field[0] == uniqueField[0] && field[1] == uniqueField[1] {
+				alreadyIn = true
+			}
+		}
+		if !alreadyIn {
+			uniquePaths = append(uniquePaths, field)
+		}
+	}
+
+	loops := 0
+	for _, field := range uniquePaths {
+		g.reset()
+		g.fields[field[1]][field[0]] = customObstacle
+		_, err := g.run()
+		if err != nil && err.Error() == "Loop detected" {
+			loops++
+		}
+	}
+
+	return loops, nil
 }
